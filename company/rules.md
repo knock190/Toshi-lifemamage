@@ -47,6 +47,7 @@
 | `company/portfolio.md` `company/direction.md` | Ω |
 | `company/decisions.md` | 秘書（代表の判断を記録）、Ω（自分の判断案を記録） |
 | `company/principles.md` | 秘書（代表の言葉をまとめる） |
+| `company/carryover.md` `company/load-log.md` | 秘書 |
 | `company/backlog.md` | 全員（追記のみ） |
 | `businesses/<事業>/inbox.md` | Ω（事業への連絡） |
 | `businesses/reading/books/_drive-snapshot.md` | 秘書 |
