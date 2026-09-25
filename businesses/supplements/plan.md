@@ -1,7 +1,7 @@
 # 計画：サプリ習慣化
 
 ## 既存の仕組み（使い続ける）
-- 記録：iPhoneショートカット → GAS → Googleスプレッドシート「サプリ管理DB」（master・logシート）
+- 記録：iPhoneショートカット → GAS → Googleスプレッドシート「サプリ管理DB」（master・logシート）。GAS のコードはチャットから直せる（Drive「GAS更新」フォルダ → 更新役GAS。`company/gas-remote-update.md`）
 - 週は月〜日
 - 通知：木曜20時に0回チェック、日曜18時に今週のまとめ（iPhoneのオートメーション）
 - 月間集計：毎月1日
