@@ -23,6 +23,14 @@
 - スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB
 - GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit。scriptId：`1DNFJuS5wk8WvNVaimOuRDfwKMtPn813f60JMmn7XcMGNLqcJqkGN6ywM`。deploymentId 登録済みで、Drive のソースを直して update すれば /exec まで反映される。2026-09-25 稼働）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
 - 手順：`setup-dnb.md`
+- グラフのページ「だんご習慣ボード」：https://claude.ai/artifact/NvqkZHYzHPn426kjSxkaye （非公開。型は `board.html`、データの入れ方は下）
+
+## 毎朝のボードの更新（秘書が 5:00 の回でやる）
+1. 「習慣データ」の DNB シートと「サプリ管理DB」の master・log シートを読む
+2. `board.html` の `board-data` と同じ形の JSON を **スクラッチ（Git の外）** に作る（updated＝今の日本時間、dnb.rows＝DNB の全行、supp.log＝log の日時の全部、weeklyTarget＝master の週の目標回数）
+3. `python3 departments/data/build_board.py <JSON> <スクラッチ>/habit-board.html`
+4. Artifact ツールで、その HTML を `url`＝上のリンクにして公開する（同じリンクのまま更新される）
+- データは Git に入れない。`board.html`（型）を直すのはデータ部
 
 ## 数字の意味は事業が見る
 データ部は仕組みと見せ方を持つ。数字の意味（DNBの伸び・サプリの達成など）を判断するのは、その事業。
