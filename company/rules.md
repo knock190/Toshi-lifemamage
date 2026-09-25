@@ -46,6 +46,7 @@
 | `handoff/to-omega.md` | 秘書 |
 | `handoff/to-secretary.md` | Ω（通常）／事業責任者（至急のみ） |
 | `company/portfolio.md` `company/direction.md` | Ω |
+| `company/overview.md`（仕組みのまとめ。外への説明用） | Ω |
 | `company/decisions.md` | 秘書（としやすの判断・フィードバックを記録）、Ω（自分の決定を記録） |
 | `company/principles.md` | 秘書（としやすの言葉をまとめる） |
 | `company/carryover.md` `company/load-log.md` | 秘書 |
