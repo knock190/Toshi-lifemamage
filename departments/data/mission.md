@@ -18,5 +18,11 @@
 - サプリ管理DBは今動いているので、すぐには移さない（読むだけ）
 - **このリポジトリは公開。ウェブアプリの URL・トークンの実値は絶対に書かない**
 
+## 置き場所
+- ドライブ「だんごカンパニー/データ部」（ID：`1tkTQt8myt1HLZahU5aBRQOQ-8veawjt-`）
+- スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB
+- GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
+- 手順：`setup-dnb.md`
+
 ## 数字の意味は事業が見る
 データ部は仕組みと見せ方を持つ。数字の意味（DNBの伸び・サプリの達成など）を判断するのは、その事業。
