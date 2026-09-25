@@ -1,0 +1,306 @@
+<title>だんご習慣ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root {
+    --bg: #f5f6f4;
+    --surface: #fcfcfb;
+    --line: #dfe2de;
+    --grid: #eceeea;
+    --ink: #151816;
+    --ink-2: #4f5551;
+    --ink-3: #7c827e;
+    --dnb: #2a78d6;
+    --dnb-soft: rgba(42,120,214,.12);
+    --supp: #1baf7a;
+    --supp-soft: #b9e6d4;
+    --target: #7c827e;
+    --good: #0f7a4f;
+    --font: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #121413;
+      --surface: #1a1c1b;
+      --line: #2e322f;
+      --grid: #242826;
+      --ink: #f2f4f2;
+      --ink-2: #c1c6c2;
+      --ink-3: #8d938f;
+      --dnb: #3987e5;
+      --dnb-soft: rgba(57,135,229,.18);
+      --supp: #199e70;
+      --supp-soft: #1f4d3c;
+      --target: #8d938f;
+      --good: #4cc792;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121413;
+    --surface: #1a1c1b;
+    --line: #2e322f;
+    --grid: #242826;
+    --ink: #f2f4f2;
+    --ink-2: #c1c6c2;
+    --ink-3: #8d938f;
+    --dnb: #3987e5;
+    --dnb-soft: rgba(57,135,229,.18);
+    --supp: #199e70;
+    --supp-soft: #1f4d3c;
+    --target: #8d938f;
+    --good: #4cc792;
+  }
+
+  body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6; }
+  .wrap { max-width: 760px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 20px; }
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+  .updated { font-family: var(--mono); font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+  section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 14px; }
+  .panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline; }
+  h2 { font-size: 16px; font-weight: 700; margin: 0; }
+  .owner { font-size: 12px; color: var(--ink-3); letter-spacing: .04em; }
+
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .stat { display: grid; gap: 2px; }
+  .stat .label { font-size: 12px; color: var(--ink-3); letter-spacing: .04em; }
+  .stat .value { font-family: var(--mono); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .stat .sub { font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .delta-up { color: var(--good); }
+
+  .chart { position: relative; }
+  .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .axis text, .lbl { font-family: var(--mono); font-size: 11px; fill: var(--ink-3); }
+  .val { font-family: var(--mono); font-size: 11px; font-weight: 600; fill: var(--ink-2); }
+  .tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.5;
+         padding: 6px 8px; border-radius: 6px; white-space: nowrap; transform: translate(-50%, -110%); font-variant-numeric: tabular-nums; }
+  .note { font-size: 12px; color: var(--ink-3); margin: 0; }
+  .empty { font-size: 14px; color: var(--ink-2); padding-block: 12px; margin: 0; }
+
+  details { font-size: 13px; }
+  summary { cursor: pointer; color: var(--ink-2); }
+  summary:focus-visible { outline: 2px solid var(--dnb); outline-offset: 2px; border-radius: 4px; }
+  .tbl { overflow-x: auto; margin-top: 8px; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th { font-weight: 500; color: var(--ink-3); font-size: 12px; }
+  td.num { font-family: var(--mono); text-align: right; }
+
+  @media (max-width: 420px) {
+    .stat .value { font-size: 17px; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>だんご習慣ボード</h1>
+    <span class="updated" id="updated"></span>
+  </header>
+
+  <section class="panel" aria-labelledby="dnb-h">
+    <div class="panel-head">
+      <h2 id="dnb-h">DNB（デュアルNバック）</h2>
+      <span class="owner" id="dnb-period">読書事業のアクションプラン</span>
+    </div>
+    <div class="stats" id="dnb-stats"></div>
+    <div class="chart" id="dnb-chart"></div>
+    <p class="note">正解率はその日の最後の記録。点の上の数字はそのときの N（何個前）。</p>
+    <details>
+      <summary>記録の一覧</summary>
+      <div class="tbl"><table id="dnb-table"></table></div>
+    </details>
+  </section>
+
+  <section class="panel" aria-labelledby="supp-h">
+    <div class="panel-head">
+      <h2 id="supp-h">サプリ</h2>
+      <span class="owner" id="supp-name">サプリ事業</span>
+    </div>
+    <div class="stats" id="supp-stats"></div>
+    <div class="chart" id="supp-chart"></div>
+    <p class="note" id="supp-note"></p>
+    <details>
+      <summary>週ごとの回数</summary>
+      <div class="tbl"><table id="supp-table"></table></div>
+    </details>
+  </section>
+</div>
+
+<!-- 毎朝 5:00 に秘書がこの JSON を入れ替える（データ部の型。departments/data/board.html） -->
+<script type="application/json" id="board-data">{"updated":null,"dnb":{"start":"2026-09-25","end":"2026-10-24","rows":[]},"supp":{"name":"クレアチン","weeklyTarget":7,"mainStart":"2026-09-28","log":[]}}</script>
+
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById('board-data').textContent);
+  var NS = 'http://www.w3.org/2000/svg';
+  var DAY = 86400000;
+  var WD = ['日','月','火','水','木','金','土'];
+
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function h(tag, text, cls) { var e = document.createElement(tag); if (text != null) e.textContent = text; if (cls) e.className = cls; return e; }
+  function parse(s) { var m = String(s).match(/(\d{4})\D(\d{1,2})\D(\d{1,2})(?:\D+(\d{1,2}):(\d{2}))?/); return m ? new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0)) : null; }
+  function dayKey(d) { return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); }
+  function md(d) { return (d.getMonth()+1) + '/' + d.getDate(); }
+  function mondayOf(d) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); var w = (x.getDay()+6)%7; return new Date(x - w*DAY); }
+  function stat(parent, label, value, sub, subCls) {
+    var s = h('div', null, 'stat'); s.appendChild(h('span', label, 'label')); s.appendChild(h('span', value, 'value'));
+    if (sub) s.appendChild(h('span', sub, 'sub' + (subCls ? ' ' + subCls : ''))); parent.appendChild(s);
+  }
+  function tipper(box) {
+    var t = h('div', null, 'tip'); t.hidden = true; box.appendChild(t);
+    return { show: function (x, y, lines) { t.textContent = ''; lines.forEach(function (l, i) { if (i) t.appendChild(document.createElement('br')); t.appendChild(document.createTextNode(l)); }); t.style.left = x + 'px'; t.style.top = y + 'px'; t.hidden = false; },
+             hide: function () { t.hidden = true; } };
+  }
+  function toPx(svg, x, y) { var r = svg.getBoundingClientRect(); var vb = svg.viewBox.baseVal; return [x * r.width / vb.width, y * r.height / vb.height]; }
+
+  document.getElementById('updated').textContent = DATA.updated ? DATA.updated + ' 更新' : 'まだ更新されていません';
+
+  /* ---------------- DNB ---------------- */
+  (function () {
+    var start = parse(DATA.dnb.start), end = parse(DATA.dnb.end);
+    var days = Math.round((end - start) / DAY) + 1;
+    document.getElementById('dnb-period').textContent = '読書事業・' + md(start) + '〜' + md(end) + '（' + days + '日）';
+
+    var rows = (DATA.dnb.rows || []).map(function (r) { return { t: parse(r.t), n: +r.n, acc: +r.acc, memo: r.memo || '' }; })
+      .filter(function (r) { return r.t; }).sort(function (a, b) { return a.t - b.t; });
+    var byDay = {};
+    rows.forEach(function (r) { byDay[dayKey(r.t)] = r; });
+    var pts = Object.keys(byDay).map(function (k) { return byDay[k]; }).sort(function (a, b) { return a.t - b.t; });
+
+    var stats = document.getElementById('dnb-stats');
+    var box = document.getElementById('dnb-chart');
+    if (!pts.length) {
+      stat(stats, '最新', '—'); stat(stats, '初回', '—'); stat(stats, '記録した日', '0 / ' + days);
+      box.appendChild(h('p', 'まだ記録がありません。ショートカット「DNB記録」で入れると、次の朝にここに出ます。', 'empty'));
+      return;
+    }
+    var first = pts[0], last = pts[pts.length - 1];
+    var diff = last.acc - first.acc;
+    stat(stats, '最新 ' + md(last.t), 'N' + last.n + '・' + last.acc + '%', pts.length > 1 ? '初回より ' + (diff >= 0 ? '+' : '') + diff + '%' : null, diff > 0 ? 'delta-up' : '');
+    stat(stats, '初回 ' + md(first.t), 'N' + first.n + '・' + first.acc + '%');
+    stat(stats, '記録した日', pts.length + ' / ' + days);
+
+    var W = Math.max(300, box.clientWidth || 680), H = 240, L = 40, R = 14, T = 22, B = 30;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'DNB の正解率の推移' }, box);
+    var x = function (d) { return L + (Math.round((d - start) / DAY) + 0.5) * (W - L - R) / days; };
+    var y = function (v) { return T + (100 - v) * (H - T - B) / 100; };
+    var ax = el('g', { class: 'axis' }, svg);
+    [0, 25, 50, 75, 100].forEach(function (v) {
+      el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'var(--grid)', 'stroke-width': 1 }, ax);
+      var t = el('text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }, ax); t.textContent = v + '%';
+    });
+    var step = W < 480 ? 14 : 7, lastTick = 0;
+    for (var i = 0; i < days; i += step) {
+      var d = new Date(start.getTime() + i * DAY); lastTick = i;
+      var t = el('text', { x: x(d), y: H - 8, 'text-anchor': i ? 'middle' : 'start' }, ax); t.textContent = md(d);
+    }
+    if (days - 1 - lastTick >= step / 2) { var tEnd = el('text', { x: x(end), y: H - 8, 'text-anchor': 'end' }, ax); tEnd.textContent = md(end); }
+
+    if (pts.length > 1) {
+      var dPath = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(p.acc).toFixed(1); }).join(' ');
+      el('path', { d: dPath + ' L' + x(last.t).toFixed(1) + ' ' + y(0) + ' L' + x(first.t).toFixed(1) + ' ' + y(0) + ' Z', fill: 'var(--dnb-soft)', stroke: 'none' }, svg);
+      el('path', { d: dPath, fill: 'none', stroke: 'var(--dnb)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    }
+    var prevN = null;
+    var tip = tipper(box);
+    pts.forEach(function (p, i) {
+      var cx = x(p.t), cy = y(p.acc), isLast = i === pts.length - 1;
+      el('circle', { cx: cx, cy: cy, r: isLast ? 5.5 : 4, fill: 'var(--dnb)', stroke: 'var(--surface)', 'stroke-width': 2 }, svg);
+      if (p.n !== prevN || isLast) { var lb = el('text', { x: cx, y: cy - 10, 'text-anchor': 'middle', class: 'val' }, svg); lb.textContent = 'N' + p.n; }
+      prevN = p.n;
+      var hit = el('rect', { x: cx - 10, y: T, width: 20, height: H - T - B, fill: 'transparent' }, svg);
+      hit.addEventListener('pointerenter', function () { var q = toPx(svg, cx, cy); tip.show(q[0], q[1], [md(p.t) + '（' + WD[p.t.getDay()] + '）', 'N' + p.n + '・正解率 ' + p.acc + '%']); });
+      hit.addEventListener('pointerleave', tip.hide);
+    });
+
+    var tbl = document.getElementById('dnb-table');
+    var hr = tbl.insertRow(); ['日時', 'N', '正解率', 'メモ'].forEach(function (s) { var th = h('th', s); hr.appendChild(th); });
+    rows.slice().reverse().forEach(function (r) {
+      var tr = tbl.insertRow();
+      tr.appendChild(h('td', md(r.t) + ' ' + String(r.t.getHours()).padStart(2, '0') + ':' + String(r.t.getMinutes()).padStart(2, '0')));
+      tr.appendChild(h('td', String(r.n), 'num')); tr.appendChild(h('td', r.acc + '%', 'num')); tr.appendChild(h('td', r.memo));
+    });
+  })();
+
+  /* ---------------- サプリ ---------------- */
+  (function () {
+    var S = DATA.supp, target = +S.weeklyTarget, mainStart = parse(S.mainStart);
+    document.getElementById('supp-name').textContent = 'サプリ事業・' + S.name + '（週' + target + '回）';
+    var times = (S.log || []).map(parse).filter(Boolean).sort(function (a, b) { return a - b; });
+    // 30分以内の押し直しは数えない（businesses/supplements/plan.md）
+    var counted = [], lastT = null;
+    times.forEach(function (t) { if (lastT === null || t - lastT > 30 * 60000) { counted.push(t); lastT = t; } });
+
+    var stats = document.getElementById('supp-stats');
+    var box = document.getElementById('supp-chart');
+    var now = DATA.updated ? parse(DATA.updated) : new Date();
+    var thisMon = mondayOf(now);
+    if (!counted.length) {
+      stat(stats, '今週', '0 / ' + target); stat(stats, '先週', '—'); stat(stats, '連続達成', '—');
+      box.appendChild(h('p', 'まだ記録がありません。', 'empty'));
+      return;
+    }
+    var firstMon = mondayOf(counted[0]);
+    var weeks = [];
+    for (var m = firstMon; m <= thisMon; m = new Date(m.getTime() + 7 * DAY)) weeks.push({ mon: m, n: 0 });
+    counted.forEach(function (t) { var k = Math.round((mondayOf(t) - firstMon) / (7 * DAY)); if (weeks[k]) weeks[k].n++; });
+    weeks = weeks.slice(-8);
+    weeks.forEach(function (w) { w.main = w.mon >= mondayOf(mainStart); w.cur = w.mon.getTime() === thisMon.getTime(); });
+
+    var cur = weeks[weeks.length - 1], prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+    var streak = 0;
+    for (var i = weeks.length - 1; i >= 0; i--) { if (weeks[i].cur) continue; if (weeks[i].main && weeks[i].n >= target) streak++; else break; }
+    stat(stats, '今週', cur.n + ' / ' + target, md(thisMon) + '〜' + md(now) + ' の分');
+    stat(stats, '先週', prev ? prev.n + ' / ' + target : '—', prev ? (prev.main ? (prev.n >= target ? '達成' : '未達') : '慣らし週') : null, prev && prev.main && prev.n >= target ? 'delta-up' : '');
+    stat(stats, '連続達成', streak + '週', '本運用は ' + md(mainStart) + ' から');
+
+    var W = Math.max(300, box.clientWidth || 680), H = 210, L = 30, R = 14, T = 20, B = 30;
+    var max = Math.max(target, Math.max.apply(null, weeks.map(function (w) { return w.n; })));
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'サプリの週ごとの回数' }, box);
+    var slot = (W - L - R) / weeks.length, bw = Math.min(44, slot * 0.6);
+    var y = function (v) { return T + (max - v) * (H - T - B) / max; };
+    var ax = el('g', { class: 'axis' }, svg);
+    for (var v = 0; v <= max; v += (max > 10 ? 2 : 1)) {
+      if (v % (max > 10 ? 4 : 2) && v !== max) continue;
+      el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'var(--grid)', 'stroke-width': 1 }, ax);
+      var t = el('text', { x: L - 6, y: y(v) + 4, 'text-anchor': 'end' }, ax); t.textContent = v;
+    }
+    var tip = tipper(box);
+    weeks.forEach(function (w, i) {
+      var cx = L + slot * (i + 0.5), top = y(w.n), base = y(0);
+      var fill = w.main ? 'var(--supp)' : 'var(--supp-soft)';
+      if (w.n > 0) {
+        var r = Math.min(4, bw / 2, base - top);
+        el('path', { d: 'M' + (cx - bw/2) + ' ' + base + ' V' + (top + r) + ' Q' + (cx - bw/2) + ' ' + top + ' ' + (cx - bw/2 + r) + ' ' + top + ' H' + (cx + bw/2 - r) + ' Q' + (cx + bw/2) + ' ' + top + ' ' + (cx + bw/2) + ' ' + (top + r) + ' V' + base + ' Z', fill: fill }, svg);
+      }
+      var vl = el('text', { x: cx, y: top - 6, 'text-anchor': 'middle', class: 'val' }, svg); vl.textContent = w.n;
+      var xl = el('text', { x: cx, y: H - 8, 'text-anchor': 'middle', class: 'lbl' }, svg); xl.textContent = w.cur ? '今週' : md(w.mon) + '〜';
+      var hit = el('rect', { x: cx - slot/2, y: T, width: slot, height: H - T - B, fill: 'transparent' }, svg);
+      hit.addEventListener('pointerenter', function () { var q = toPx(svg, cx, top); tip.show(q[0], q[1], [md(w.mon) + '〜' + md(new Date(w.mon.getTime() + 6*DAY)), w.n + ' / ' + target + ' 回' + (w.main ? '' : '（慣らし）')]); });
+      hit.addEventListener('pointerleave', tip.hide);
+    });
+    el('line', { x1: L, x2: W - R, y1: y(target), y2: y(target), stroke: 'var(--target)', 'stroke-width': 1.5, 'stroke-dasharray': '4 4' }, svg);
+    var tl = el('text', { x: W - R, y: y(target) - 6, 'text-anchor': 'end', class: 'lbl' }, svg); tl.textContent = '目標 ' + target;
+    document.getElementById('supp-note').textContent = '薄い棒は本運用前の慣らし週。30分以内の押し直しは1回にまとめて数える。';
+
+    var tbl = document.getElementById('supp-table');
+    var hr = tbl.insertRow(); ['週', '回数', ''].forEach(function (s) { hr.appendChild(h('th', s)); });
+    weeks.slice().reverse().forEach(function (w) {
+      var tr = tbl.insertRow();
+      tr.appendChild(h('td', md(w.mon) + '〜' + md(new Date(w.mon.getTime() + 6*DAY))));
+      tr.appendChild(h('td', w.n + ' / ' + target, 'num'));
+      tr.appendChild(h('td', w.cur ? '途中' : (w.main ? (w.n >= target ? '達成' : '未達') : '慣らし')));
+    });
+  })();
+})();
+</script>
