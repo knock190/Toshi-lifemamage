@@ -21,7 +21,7 @@
 ## 置き場所
 - ドライブ「だんごカンパニー/データ部」（ID：`1tkTQt8myt1HLZahU5aBRQOQ-8veawjt-`）
 - スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB
-- GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
+- GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit。scriptId：`1DNFJuS5wk8WvNVaimOuRDfwKMtPn813f60JMmn7XcMGNLqcJqkGN6ywM`。deploymentId 登録済みで、Drive のソースを直して update すれば /exec まで反映される。2026-09-25 稼働）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
 - 手順：`setup-dnb.md`
 
 ## 数字の意味は事業が見る
