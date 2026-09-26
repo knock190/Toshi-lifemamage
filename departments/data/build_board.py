@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""グラフのページ（board.html）にデータを入れて、公開用の HTML を作る。
+"""グラフのページ（board.html）に控えのデータを入れた HTML を作る（予備）。
+ふだんのボードは開いたときにシートを直接読むので、これは使わない（mission.md の「ボードのデータ」）。
 
 使い方: python3 departments/data/build_board.py <data.json> <出力先.html>
 data.json は board.html の <script id="board-data"> と同じ形。

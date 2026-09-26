@@ -17,6 +17,7 @@
     --supp-soft: #b9e6d4;
     --target: #7c827e;
     --good: #0f7a4f;
+    --warn: #a3580f;
     --font: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
     --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   }
@@ -36,6 +37,7 @@
       --supp-soft: #1f4d3c;
       --target: #8d938f;
       --good: #4cc792;
+      --warn: #e59a4c;
     }
   }
   :root[data-theme="dark"] {
@@ -53,6 +55,7 @@
     --supp-soft: #1f4d3c;
     --target: #8d938f;
     --good: #4cc792;
+    --warn: #e59a4c;
   }
 
   body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.6; }
@@ -60,6 +63,10 @@
   header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; }
   h1 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: .02em; text-wrap: balance; }
   .updated { font-family: var(--mono); font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .source { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 12px; color: var(--ink-2); margin: -8px 0 0; }
+  .source.warn { color: var(--warn); }
+  .source button { font: inherit; font-size: 12px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+  .source button:focus-visible { outline: 2px solid var(--dnb); outline-offset: 2px; }
 
   section.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 14px; }
   .panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; align-items: baseline; }
@@ -101,6 +108,7 @@
     <h1>だんご習慣ボード</h1>
     <span class="updated" id="updated"></span>
   </header>
+  <p class="source" id="source"><span id="source-text">シートを読んでいます…</span><button type="button" id="reload" hidden>読み直す</button></p>
 
   <section class="panel" aria-labelledby="dnb-h">
     <div class="panel-head">
@@ -131,12 +139,12 @@
   </section>
 </div>
 
-<!-- 毎朝 5:00 に秘書がこの JSON を入れ替える（データ部の型。departments/data/board.html） -->
+<!-- 期間などの設定と、シートを読めないときの控え。ふだんはページを開いたときに Google Drive のシートを直接読む（2026-09-27 データ部。departments/data/board.html） -->
 <script type="application/json" id="board-data">{"updated":null,"dnb":{"start":"2026-09-25","end":"2026-10-24","rows":[]},"supp":{"name":"クレアチン","weeklyTarget":7,"mainStart":"2026-09-28","log":[]}}</script>
 
 <script>
 (function () {
-  var DATA = JSON.parse(document.getElementById('board-data').textContent);
+  var BASE = JSON.parse(document.getElementById('board-data').textContent);
   var NS = 'http://www.w3.org/2000/svg';
   var DAY = 86400000;
   var WD = ['日','月','火','水','木','金','土'];
@@ -163,7 +171,9 @@
   }
   function toPx(svg, x, y) { var r = svg.getBoundingClientRect(); var vb = svg.viewBox.baseVal; return [x * r.width / vb.width, y * r.height / vb.height]; }
 
-  document.getElementById('updated').textContent = DATA.updated ? DATA.updated + ' 更新' : 'まだ更新されていません';
+  function render(DATA) {
+  ['dnb-stats', 'dnb-chart', 'dnb-table', 'supp-stats', 'supp-chart', 'supp-table', 'supp-note'].forEach(function (id) { document.getElementById(id).textContent = ''; });
+  document.getElementById('updated').textContent = DATA.updated ? DATA.updated + (DATA.live ? ' 読み込み' : ' 更新') : 'まだ更新されていません';
 
   /* ---------------- DNB ---------------- */
   (function () {
@@ -302,5 +312,85 @@
       tr.appendChild(h('td', w.cur ? '途中' : (w.main ? (w.n >= target ? '達成' : '未達') : '慣らし')));
     });
   })();
+  }
+
+  /* ---------------- シートを直接読む（Google Drive のコネクタ。としやすの権限で読む） ---------------- */
+  var GD = 'Google Drive';
+  var HABIT_ID = '1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs'; // 習慣データ（departments/data/mission.md）
+  var SUPP_TITLE = 'サプリ管理DB'; // IDは書かず題名で探す（mission.md）
+  var srcText = document.getElementById('source-text'), srcBox = document.getElementById('source'), reloadBtn = document.getElementById('reload');
+  function setSource(text, warn) { srcText.textContent = text; srcBox.classList.toggle('warn', !!warn); }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function stamp(d) { return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+
+  // read_file_content の本文（シートごとの表）を {シート名: {rows, expected}} にする。1行目は見出し
+  function sheets(text) {
+    var out = {};
+    String(text).split(/^### Sheet Name: /m).slice(1).forEach(function (part) {
+      var name = part.split('\n')[0].trim();
+      var rng = part.match(/### Table Range: [A-Z]+(\d+):[A-Z]+(\d+)/);
+      var body = part.split('### Table Columns:')[0];
+      var lines = body.split('\n').filter(function (l) { return /^\|/.test(l.trim()); });
+      var rows = lines.slice(2).map(function (l) { return l.trim().replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); }); });
+      out[name] = { head: rows[0] || [], rows: rows.slice(1), expected: rng ? (+rng[2] - +rng[1]) : null };
+    });
+    return out;
+  }
+  function col(sheet, label) { return sheet.head.indexOf(label); }
+  function textOf(res) { var p = res && res.payload; return p && typeof p === 'object' ? p.fileContent : p; }
+  function why(e) {
+    var c = e && e.code;
+    if (c === 'needs_reauth') return 'Google Drive のつながりが切れています。claude.ai の設定 → コネクタ でつなぎ直してください';
+    if (c === 'server_not_connected' || c === 'selection_required') return 'Google Drive のコネクタが使えません。claude.ai の設定 → コネクタ で追加（または選択）してください';
+    if (c === 'not_in_manifest' || c === 'not_granted' || c === 'consent_required') return 'このページに Google Drive を使う許可が出ていません。読み直すと、もう一度聞かれます';
+    if (c === 'blocked_by_policy' || c === 'approval_required') return 'Google Drive の読み取りが設定で止められています';
+    if (c === 'server_unavailable' || c === 'rate_limited') return 'Google Drive が一時的に応答しません。少し待って読み直してください';
+    return 'シートを読めませんでした（' + (e && e.message || c || '不明') + '）';
+  }
+
+  function call(mcp, tool, input, retried) {
+    return mcp.callTool(GD, tool, input, { cache: { staleTime: 60000 } }).catch(function (e) {
+      if (e && e.retryable && !retried) return new Promise(function (ok) { setTimeout(ok, Math.min(e.retryAfterMs || 1500 + Math.random() * 1500, 10000)); }).then(function () { return call(mcp, tool, input, true); });
+      throw e;
+    });
+  }
+
+  function load(mcp) {
+    reloadBtn.hidden = true;
+    setSource('シートを読んでいます…');
+    var habit = call(mcp, 'read_file_content', { fileId: HABIT_ID }).then(textOf);
+    var supp = call(mcp, 'search_files', { query: "title = '" + SUPP_TITLE + "' and mimeType = 'application/vnd.google-apps.spreadsheet'", excludeContentSnippets: true })
+      .then(function (r) { var f = r.payload && r.payload.files && r.payload.files[0]; if (!f) throw { code: 'tool_error', message: SUPP_TITLE + ' が見つかりません' }; return call(mcp, 'read_file_content', { fileId: f.id }); })
+      .then(textOf);
+    return Promise.all([habit, supp]).then(function (t) {
+      var H = sheets(t[0]).DNB, S = sheets(t[1]), log = S.log, master = S.master;
+      if (!H || !log || !master) throw { code: 'tool_error', message: '表の形が思っていたのと違います' };
+      var cut = [H, log].some(function (x) { return x.expected != null && x.rows.length < x.expected; });
+      var d = { updated: stamp(new Date()), live: true, dnb: BASE.dnb, supp: JSON.parse(JSON.stringify(BASE.supp)) };
+      var it = col(H, '日時'), iN = col(H, 'N'), iA = col(H, '正解率'), iM = col(H, 'メモ');
+      d.dnb = { start: BASE.dnb.start, end: BASE.dnb.end, rows: H.rows.filter(function (r) { return r[it]; }).map(function (r) { return { t: r[it], n: r[iN], acc: r[iA], memo: iM < 0 ? '' : r[iM] }; }) };
+      var mRow = master.rows.filter(function (r) { return r[col(master, 'サプリ名')] === BASE.supp.name; })[0] || master.rows[0];
+      if (mRow) { d.supp.name = mRow[col(master, 'サプリ名')] || d.supp.name; d.supp.weeklyTarget = +mRow[col(master, '週の目標回数')] || d.supp.weeklyTarget; }
+      var lt = col(log, '日時'), ln = col(log, 'サプリ名');
+      d.supp.log = log.rows.filter(function (r) { return r[lt] && (ln < 0 || !r[ln] || r[ln] === d.supp.name); }).map(function (r) { return r[lt]; });
+      render(d);
+      setSource(cut ? 'シートの一部しか読めていません。数が少なく出ている可能性があります' : 'シート（習慣データ・サプリ管理DB）から今読んだ数字です', cut);
+      reloadBtn.hidden = false;
+    }).catch(function (e) {
+      setSource(why(e) + (BASE.updated ? '。下は ' + BASE.updated + ' の控えです' : ''), true);
+      reloadBtn.hidden = false;
+    });
+  }
+
+  render(BASE);
+  if (window.claude && window.claude.use) {
+    window.claude.use('mcp').then(function (mcp) {
+      if (!mcp) { setSource(BASE.updated ? 'シートを直接読めない画面です。' + BASE.updated + ' の控えを出しています' : 'シートを直接読めない画面です。claude.ai で開いてください', true); return; }
+      reloadBtn.addEventListener('click', function () { mcp.invalidate(GD).catch(function () {}).then(function () { load(mcp); }); });
+      load(mcp);
+    });
+  } else {
+    setSource(BASE.updated ? BASE.updated + ' の控えです（claude.ai で開くとシートを直接読みます）' : 'claude.ai で開くとシートを直接読みます', true);
+  }
 })();
 </script>
