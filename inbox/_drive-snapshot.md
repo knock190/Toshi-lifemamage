@@ -1,5 +1,7 @@
 今日の感想
 
+最近だんごカンパニーの仕組みや決め事
+
   1. 読書：読む（目安30分）7:00〜
 
 <https://docs.google.com/document/d/1CTSkS4rHZ2-qCTtQMEc8nsn8QsBzgn5sgY5cLH8hcKE/edit?usp=drivesdk>
