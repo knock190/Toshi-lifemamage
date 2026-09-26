@@ -83,6 +83,8 @@
 
 月曜 5:00 の回の中で、今週の配分（どの事業にどれだけ時間を使うか）を `meetings/weekly/YYYY-Www.md` に短く書き、各事業の `inbox.md` に伝える。同じ回の中で作業者が今週の `tasks.md` を作り、事業責任者がチェックする。材料はとしやすの余力（`company/owner.md`・カレンダー）・持ち越しリスト・先週の振り返り
 
+同じ回の中で `company/later.md`（時期が来たらやること）を上から見る。日付が来た・条件を満たした件だけ、担当の `inbox.md` か `handoff/to-secretary.md` に渡してから消す。まだの件は何もしない（としやすへの報告もしない）
+
 ### としやすのフィードバック
 
 - 秘書から `handoff/to-omega.md` で `A○ B× 理由` が届いたら、`company/decisions.md` のその決定の下に「一致／学び」を書く
