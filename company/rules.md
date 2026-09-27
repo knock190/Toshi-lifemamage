@@ -54,7 +54,7 @@
 | `company/carryover.md` `company/load-log.md` | 秘書 |
 | `company/backlog.md` | 全員（追記のみ） |
 | `company/later.md`（時期が来たらやること） | 全員（追記）／Ω（担当へ渡して消す） |
-| `businesses/<事業>/inbox.md` | Ω（事業への連絡） |
+| `businesses/<事業>/inbox.md` | Ω（事業への連絡）／秘書（計画とのずれの連絡だけ。`roles/secretary.md`） |
 | `meetings/` | Ω（週の配分。月曜 5:00 の回） |
 | `teacher/`（`advice/`・`log.md`） | 先生 |
 | `company/research/` | Ω（事業にする前の調査。2026-09-25 Ωの決定 H） |
