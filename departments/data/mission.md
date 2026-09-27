@@ -13,15 +13,16 @@
 
 ## 決まっていること（2026-09-25 としやす決定。`company/decisions.md`）
 - 習慣のデータは、1つのスプレッドシート「習慣データ」にシート（DNB・体重・筋トレ…）で分けて貯める。Git には貯めない
-- 入力は iPhone ショートカット → GAS → スプレッドシート（DNB）。GAS はチャットから作る仕組み（`company/gas-remote-update.md`）で作る
+- 入力は iPhone ショートカット → GAS → スプレッドシート。GAS はチャットから作る仕組み（`company/gas-remote-update.md`）で作る
+- **習慣は汎用の形で足す**（2026-09-27 としやす決定・作った）：GAS の `HABITS` に1つ足せば、シートは GAS が作る。ショートカットは1本で、習慣の一覧を GAS（`list`）から取るので、習慣が増えても直さない。記録が日時だけの習慣（瞑想など）は選ぶだけで記録できる
 - グラフは claude.ai のWebページで、毎朝 5:00 に秘書がデータを入れ直す
 - サプリ管理DBは今動いているので、すぐには移さない（読むだけ）
 - **このリポジトリは公開。ウェブアプリの URL・トークンの実値は絶対に書かない**
 
 ## 置き場所
 - ドライブ「だんごカンパニー/データ部」（ID：`1tkTQt8myt1HLZahU5aBRQOQ-8veawjt-`）
-- スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB
-- GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit。scriptId：`1DNFJuS5wk8WvNVaimOuRDfwKMtPn813f60JMmn7XcMGNLqcJqkGN6ywM`。deploymentId 登録済みで、Drive のソースを直して update すれば /exec まで反映される。2026-09-25 稼働）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
+- スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB（日時・N・正解率・メモ）／瞑想（日時だけ。2026-09-27 から）。**シート1枚＝習慣1つ**で、1列目は必ず日時
+- GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit。scriptId：`1DNFJuS5wk8WvNVaimOuRDfwKMtPn813f60JMmn7XcMGNLqcJqkGN6ywM`。deploymentId 登録済みで、Drive のソースを直して update すれば /exec まで反映される。2026-09-25 稼働。2026-09-27 に版 2026-09-27.2 の汎用の形へ：action は `ping`・`list`（習慣の一覧）・`log`（habit を指定して1行）・`undo`・`last`・`week`（今週 月〜日の回数）。旧 `dnb` 系も互換で残る）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
 - 手順：`setup-dnb.md`
 - グラフのページ「だんご習慣ボード」：https://claude.ai/artifact/NvqkZHYzHPn426kjSxkaye （非公開。型は `board.html`、データの読み方は下）
 
