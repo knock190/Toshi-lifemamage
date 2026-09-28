@@ -15,6 +15,7 @@
     --dnb-soft: rgba(42,120,214,.12);
     --supp: #1baf7a;
     --supp-soft: #b9e6d4;
+    --med: #8a5cd1;
     --target: #7c827e;
     --good: #0f7a4f;
     --warn: #a3580f;
@@ -35,6 +36,7 @@
       --dnb-soft: rgba(57,135,229,.18);
       --supp: #199e70;
       --supp-soft: #1f4d3c;
+      --med: #a07ee6;
       --target: #8d938f;
       --good: #4cc792;
       --warn: #e59a4c;
@@ -53,6 +55,7 @@
     --dnb-soft: rgba(57,135,229,.18);
     --supp: #199e70;
     --supp-soft: #1f4d3c;
+    --med: #a07ee6;
     --target: #8d938f;
     --good: #4cc792;
     --warn: #e59a4c;
@@ -137,10 +140,24 @@
       <div class="tbl"><table id="supp-table"></table></div>
     </details>
   </section>
+
+  <section class="panel" aria-labelledby="med-h">
+    <div class="panel-head">
+      <h2 id="med-h">瞑想</h2>
+      <span class="owner" id="med-name">習慣（5分）</span>
+    </div>
+    <div class="stats" id="med-stats"></div>
+    <div class="chart" id="med-chart"></div>
+    <p class="note">1日に何回記録しても1日として数える。目安の回数はまだ決めていない。</p>
+    <details>
+      <summary>週ごとの日数</summary>
+      <div class="tbl"><table id="med-table"></table></div>
+    </details>
+  </section>
 </div>
 
 <!-- 期間などの設定と、シートを読めないときの控え。ふだんはページを開いたときに Google Drive のシートを直接読む（2026-09-27 データ部。departments/data/board.html） -->
-<script type="application/json" id="board-data">{"updated":null,"dnb":{"start":"2026-09-25","end":"2026-10-24","rows":[]},"supp":{"name":"クレアチン","weeklyTarget":7,"mainStart":"2026-09-28","log":[]}}</script>
+<script type="application/json" id="board-data">{"updated":null,"dnb":{"start":"2026-09-25","end":"2026-10-24","rows":[]},"supp":{"name":"クレアチン","weeklyTarget":7,"mainStart":"2026-09-28","log":[]},"med":{"start":"2026-09-27","log":[]}}</script>
 
 <script>
 (function () {
@@ -172,7 +189,7 @@
   function toPx(svg, x, y) { var r = svg.getBoundingClientRect(); var vb = svg.viewBox.baseVal; return [x * r.width / vb.width, y * r.height / vb.height]; }
 
   function render(DATA) {
-  ['dnb-stats', 'dnb-chart', 'dnb-table', 'supp-stats', 'supp-chart', 'supp-table', 'supp-note'].forEach(function (id) { document.getElementById(id).textContent = ''; });
+  ['dnb-stats', 'dnb-chart', 'dnb-table', 'supp-stats', 'supp-chart', 'supp-table', 'supp-note', 'med-stats', 'med-chart', 'med-table'].forEach(function (id) { document.getElementById(id).textContent = ''; });
   document.getElementById('updated').textContent = DATA.updated ? DATA.updated + (DATA.live ? ' 読み込み' : ' 更新') : 'まだ更新されていません';
 
   /* ---------------- DNB ---------------- */
@@ -312,6 +329,64 @@
       tr.appendChild(h('td', w.cur ? '途中' : (w.main ? (w.n >= target ? '達成' : '未達') : '慣らし')));
     });
   })();
+
+  /* ---------------- 瞑想（習慣データの「瞑想」シート。日時だけ） ---------------- */
+  (function () {
+    var M = DATA.med || { log: [] };
+    var seen = {};
+    var days = (M.log || []).map(parse).filter(Boolean).sort(function (a, b) { return a - b; })
+      .filter(function (t) { var k = dayKey(t); if (seen[k]) return false; seen[k] = 1; return true; });
+    var stats = document.getElementById('med-stats');
+    var box = document.getElementById('med-chart');
+    var now = DATA.updated ? parse(DATA.updated) : new Date();
+    var thisMon = mondayOf(now);
+    if (!days.length) {
+      stat(stats, '今週', '0日'); stat(stats, '先週', '—'); stat(stats, '記録した日', '0');
+      box.appendChild(h('p', 'まだ記録がありません。ショートカットで「瞑想」を選ぶと記録されます。', 'empty'));
+      return;
+    }
+    var firstMon = mondayOf(days[0]);
+    var weeks = [];
+    for (var m = firstMon; m <= thisMon; m = new Date(m.getTime() + 7 * DAY)) weeks.push({ mon: m, n: 0, done: {} });
+    days.forEach(function (t) { var k = Math.round((mondayOf(t) - firstMon) / (7 * DAY)); if (weeks[k]) { weeks[k].n++; weeks[k].done[(t.getDay() + 6) % 7] = 1; } });
+    var cur = weeks[weeks.length - 1], prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+    stat(stats, '今週', cur.n + '日', md(thisMon) + '〜' + md(now) + ' の分');
+    stat(stats, '先週', prev ? prev.n + '日' : '—');
+    stat(stats, '記録した日', days.length + '日', md(days[0]) + ' から');
+
+    // 最近の週（最大8週）を、月〜日のマスで並べる
+    var show = weeks.slice(-8);
+    var W = Math.max(300, box.clientWidth || 680), L = 64, R = 14, T = 22, row = 26;
+    var H = T + row * show.length + 4;
+    var svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': '瞑想をした日（週ごと）' }, box);
+    var cw = (W - L - R) / 7, sz = Math.min(20, cw - 6, row - 6);
+    ['月','火','水','木','金','土','日'].forEach(function (d, i) { var t = el('text', { x: L + cw * (i + 0.5), y: 14, 'text-anchor': 'middle', class: 'lbl' }, svg); t.textContent = d; });
+    var tip = tipper(box);
+    show.forEach(function (w, r) {
+      var cy = T + row * r + row / 2;
+      var wl = el('text', { x: 0, y: cy + 4, class: 'lbl' }, svg); wl.textContent = w.mon.getTime() === thisMon.getTime() ? '今週' : md(w.mon) + '〜';
+      for (var i = 0; i < 7; i++) {
+        var d = new Date(w.mon.getTime() + i * DAY), cx = L + cw * (i + 0.5);
+        var future = d > now, on = !!w.done[i];
+        el('rect', { x: cx - sz / 2, y: cy - sz / 2, width: sz, height: sz, rx: 4,
+          fill: on ? 'var(--med)' : 'none', stroke: on ? 'none' : 'var(--line)', 'stroke-width': 1.5, 'stroke-dasharray': future ? '3 3' : null }, svg);
+        (function (d, on, cx, cy) {
+          var hit = el('rect', { x: cx - cw / 2, y: cy - row / 2, width: cw, height: row, fill: 'transparent' }, svg);
+          hit.addEventListener('pointerenter', function () { var q = toPx(svg, cx, cy - sz / 2); tip.show(q[0], q[1], [md(d) + '（' + WD[d.getDay()] + '）', on ? 'やった' : (d > now ? 'これから' : '記録なし')]); });
+          hit.addEventListener('pointerleave', tip.hide);
+        })(d, on, cx, cy);
+      }
+    });
+
+    var tbl = document.getElementById('med-table');
+    var hr = tbl.insertRow(); ['週', '日数', ''].forEach(function (s) { hr.appendChild(h('th', s)); });
+    weeks.slice().reverse().forEach(function (w) {
+      var tr = tbl.insertRow();
+      tr.appendChild(h('td', md(w.mon) + '〜' + md(new Date(w.mon.getTime() + 6*DAY))));
+      tr.appendChild(h('td', w.n + ' / 7', 'num'));
+      tr.appendChild(h('td', w.mon.getTime() === thisMon.getTime() ? '途中' : ''));
+    });
+  })();
   }
 
   /* ---------------- シートを直接読む（Google Drive のコネクタ。としやすの権限で読む） ---------------- */
@@ -363,9 +438,9 @@
       .then(function (r) { var f = r.payload && r.payload.files && r.payload.files[0]; if (!f) throw { code: 'tool_error', message: SUPP_TITLE + ' が見つかりません' }; return call(mcp, 'read_file_content', { fileId: f.id }); })
       .then(textOf);
     return Promise.all([habit, supp]).then(function (t) {
-      var H = sheets(t[0]).DNB, S = sheets(t[1]), log = S.log, master = S.master;
+      var HS = sheets(t[0]), H = HS.DNB, MS = HS['瞑想'], S = sheets(t[1]), log = S.log, master = S.master;
       if (!H || !log || !master) throw { code: 'tool_error', message: '表の形が思っていたのと違います' };
-      var cut = [H, log].some(function (x) { return x.expected != null && x.rows.length < x.expected; });
+      var cut = [H, log, MS].filter(Boolean).some(function (x) { return x.expected != null && x.rows.length < x.expected; });
       var d = { updated: stamp(new Date()), live: true, dnb: BASE.dnb, supp: JSON.parse(JSON.stringify(BASE.supp)) };
       var it = col(H, '日時'), iN = col(H, 'N'), iA = col(H, '正解率'), iM = col(H, 'メモ');
       d.dnb = { start: BASE.dnb.start, end: BASE.dnb.end, rows: H.rows.filter(function (r) { return r[it]; }).map(function (r) { return { t: r[it], n: r[iN], acc: r[iA], memo: iM < 0 ? '' : r[iM] }; }) };
@@ -373,6 +448,8 @@
       if (mRow) { d.supp.name = mRow[col(master, 'サプリ名')] || d.supp.name; d.supp.weeklyTarget = +mRow[col(master, '週の目標回数')] || d.supp.weeklyTarget; }
       var lt = col(log, '日時'), ln = col(log, 'サプリ名');
       d.supp.log = log.rows.filter(function (r) { return r[lt] && (ln < 0 || !r[ln] || r[ln] === d.supp.name); }).map(function (r) { return r[lt]; });
+      if (MS) { var mt = col(MS, '日時'); d.med = { start: BASE.med.start, log: MS.rows.map(function (r) { return r[mt < 0 ? 0 : mt]; }).filter(Boolean) }; }
+      else d.med = BASE.med;
       render(d);
       setSource(cut ? 'シートの一部しか読めていません。数が少なく出ている可能性があります' : 'シート（習慣データ・サプリ管理DB）から今読んだ数字です', cut);
       reloadBtn.hidden = false;
