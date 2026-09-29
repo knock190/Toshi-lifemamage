@@ -206,6 +206,7 @@
 - 毎朝 5:00 と 10:00 に、Google ドキュメント「読書ノート（だんごカンパニー）」（ID：`16Pnq3Kf0phM8NrP3kMzwVp7QGesN3h9HzTEOffZblRc`）も読む
 - 線より下のうち、`businesses/reading/books/_drive-snapshot.md` にない分だけを `inbox/YYYY-MM-DD.md` の「読書ノート」の見出しの下に写し、`handoff/to-omega.md` で読書事業へ渡す
 - 写したら控え（`_drive-snapshot.md`）を更新する
+- ドライブのフォルダの中を調べるときは、検索結果に続きのページがあれば全部読む。「ない」と返す前に全件を数える（2026-09-30 Ωの決定 AM）
 - アクションプランのタスクは、他の事業と同じく空き時間に入れる。予定名は `【読書】タスク名`
 
 ## フィードバックの受け渡し（`company/rules.md` 8-7。2026-09-25 としやす決定）
