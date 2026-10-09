@@ -5,7 +5,7 @@
 | 著者 | 迫（2章の本文「迫さんのお話をもっと聞きたいです」から。下の名前は本文に出ていない。「Brain」を運営する経営者） |
 | ジャンル | 考え方・お金（幸福度と稼ぎ方） |
 | 取り込んだ日 | 2026-10-08（目次・1章。2章も同じ日。チャット）。3章（おわりにを含む）は 2026-10-09 |
-| 本の内容のドキュメント | Google ドライブのフォルダ「新人生攻略ロードマップ」（ID：`1KTiU_NrUbnCHP9JH2QrSXAwK6hLIPCyP`）<br>・目次：Google ドキュメント「目次」（ID：`1HlHz2AfqGjKeK-2Fb4x8-nZclfoLx8pxsA2mqzTpcHg`、作成 2026-10-08 07:35）<br>・1章：Google ドキュメント「1章」（ID：`1MgpeIwPQPa2FCQPXDqxsecGvrO6dQHIcmeNYE5X7Oos`、作成 2026-10-08 07:39）<br>・2章：Google ドキュメント「2章」（ID：`1NP-skPsfglDUwZoSFsAgTtdEYOZ2isymuYko7hqNWb4`、作成 2026-10-08 12:29）<br>・3章：Google ドキュメント「3章」（ID：`1OPZkezd4OnsgugGqiwOJob-NPblYBwWXhqwK2z07KT4`、作成 2026-10-09 17:07。おわりにも入っている） |
+| 本の内容のドキュメント | Google ドライブのフォルダ「新人生攻略ロードマップ」（ID：`1KTiU_NrUbnCHP9JH2QrSXAwK6hLIPCyP`）<br>・目次：Google ドキュメント「目次」（ID：`1HlHz2AfqGjKeK-2Fb4x8-nZclfoLx8pxsA2mqzTpcHg`、作成 2026-10-08 07:35）<br>・1章：Google ドキュメント「1章」（ID：`1MgpeIwPQPa2FCQPXDqxsecGvrO6dQHIcmeNYE5X7Oos`、作成 2026-10-08 07:39）<br>・2章：Google ドキュメント「2章」（ID：`1NP-skPsfglDUwZoSFsAgTtdEYOZ2isymuYko7hqNWb4`、作成 2026-10-08 12:29）<br>・3章：Google ドキュメント「3章」（ID：`1OPZkezd4OnsgugGqiwOJob-NPblYBwWXhqwK2z07KT4`、作成 2026-10-09 17:07。おわりにも入っている）<br>・1章の要約：Google ドキュメント「1章 要点ごとの要約」（ID：`1iAard9I2DAo3ry_nw9atajKIFStYKo1hVPZRbA21nSM`、作成 2026-10-09 19:35。下の「1章の要点ごとの長めの要約」と同じ中身。としやすの依頼で秘書が置いた） |
 | 取り込んだ章 | 目次・1章・2章（2026-10-08）、3章・おわりに（2026-10-09）。はじめにはとしやすの判断で飛ばした＝2026-10-09 読了 |
 | 手に入れた日 | 2026-10-08 ごろ（としやすが新しく買った。「新しく購入して読んでます」） |
 
