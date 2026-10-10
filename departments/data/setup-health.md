@@ -28,7 +28,7 @@
 
 ## としやすの手順（1回だけ・15分くらい）
 
-### 1. GAS に反映する（タップ1回）
+### 1. GAS に反映する（タップ1回。チャット側にリンクを作ってもらう：`handoff-chat-health.md` の「共有する文」を貼る）
 `<UPDATER_URL>?token=<UPDATER_TOKEN>&action=update&target=habit&file=appsscript.json,habit_data.gs`
 → 「コードを反映しました」。確かめるなら `<習慣GASのURL>?token=<習慣GASのトークン>&action=ping` を開いて `"version":"2026-10-10.1"` が出れば OK
 - 新しい許可は要らない（今と同じスプレッドシートを触るだけ）
