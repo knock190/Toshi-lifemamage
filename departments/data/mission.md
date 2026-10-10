@@ -21,7 +21,7 @@
 
 ## 置き場所
 - ドライブ「だんごカンパニー/データ部」（ID：`1tkTQt8myt1HLZahU5aBRQOQ-8veawjt-`）
-- スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB（日時・N・正解率・メモ）／瞑想（日時だけ。2026-09-27 から）。**シート1枚＝習慣1つ**で、1列目は必ず日時
+- スプレッドシート「習慣データ」（ID：`1BxLuhkWOdBczRrW2gf2GkhHN5c-znUSACOL5lt8ciPs`）。シート：DNB（日時・N・正解率・メモ）／瞑想（日時だけ。2026-09-27 から）／ヘルスケア（1日1行。対象日・睡眠・歩数・距離・体重。2026-10-10 から。`setup-health.md`）。**シート1枚＝習慣1つ**で、1列目は必ず日時
 - GAS：習慣データにくっついた「習慣データGAS」（更新役の target=habit。scriptId：`1DNFJuS5wk8WvNVaimOuRDfwKMtPn813f60JMmn7XcMGNLqcJqkGN6ywM`。deploymentId 登録済みで、Drive のソースを直して update すれば /exec まで反映される。2026-09-25 稼働。2026-09-27 に版 2026-09-27.2 の汎用の形へ：action は `ping`・`list`（習慣の一覧）・`log`（habit を指定して1行）・`undo`・`last`・`week`（今週 月〜日の回数）。旧 `dnb` 系も互換で残る）。ソースは「GAS更新」フォルダの `habit_data.gs`・`appsscript.json`
 - 手順：`setup-dnb.md`
 - グラフのページ「だんご習慣ボード」：https://claude.ai/artifact/NvqkZHYzHPn426kjSxkaye （非公開。型は `board.html`、データの読み方は下）
